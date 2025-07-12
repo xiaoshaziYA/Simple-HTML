@@ -1,0 +1,542 @@
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户登录/注册</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #333;
+            overflow: hidden;
+        }
+        
+        /* 流星拖尾效果 */
+        .trail {
+            position: absolute;
+            width: 100px;
+            height: 2px;
+            background: linear-gradient(90deg, rgba(255,255,255,0.8), rgba(255,255,255,0));
+            border-radius: 50%;
+            pointer-events: none;
+            transform-origin: left center;
+            z-index: 1;
+            filter: blur(1px);
+            opacity: 0;
+            animation: trailFade 0.5s forwards;
+        }
+        
+        @keyframes trailFade {
+            0% {
+                opacity: 0.8;
+                transform: scaleX(0);
+            }
+            100% {
+                opacity: 0;
+                transform: scaleX(1);
+            }
+        }
+        
+        /* 主容器 */
+        .main-container {
+            width: 800px;
+            height: 500px;
+            display: flex;
+            position: relative;
+            transition: all 0.6s ease-in-out;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            border-radius: 20px;
+            overflow: hidden;
+            z-index: 2;
+            background: white;
+        }
+        
+        /* 登录状态 - 竖版 */
+        .login-mode {
+            flex-direction: row;
+        }
+        
+        /* 注册状态 - 横版 */
+        .register-mode {
+            flex-direction: column;
+            height: 550px;
+        }
+        
+        /* 背景图案区域 */
+        .pattern-bg {
+            width: 40%;
+            height: 100%;
+            background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.6s ease-in-out;
+        }
+        
+        .register-mode .pattern-bg {
+            width: 100%;
+            height: 150px;
+        }
+        
+        /* 自绘线条图案 */
+        .pattern-bg::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                linear-gradient(45deg, rgba(255,255,255,0.1) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.1) 75%, transparent 75%, transparent),
+                linear-gradient(-45deg, rgba(255,255,255,0.1) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.1) 75%, transparent 75%, transparent);
+            background-size: 40px 40px;
+            opacity: 0.5;
+        }
+        
+        /* 表单区域 */
+        .form-container {
+            width: 60%;
+            padding: 30px;
+            transition: all 0.6s ease-in-out;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .register-mode .form-container {
+            width: 100%;
+            height: calc(100% - 150px);
+            padding: 20px 40px;
+        }
+        
+        .form-content {
+            transition: opacity 0.3s ease;
+        }
+        
+        .register-mode .form-content {
+            animation: fadeIn 0.4s ease 0.3s forwards;
+            opacity: 0;
+        }
+        
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+            }
+        }
+        
+        .title {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 30px;
+            text-align: center;
+            color: #4a4a4a;
+            transition: all 0.3s;
+        }
+        
+        .register-mode .title {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        
+        .input-group {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        
+        .input-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e6e6e6;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s;
+            outline: none;
+        }
+        
+        .input-group input:focus {
+            border-color: #667eea;
+        }
+        
+        .input-group label {
+            position: absolute;
+            left: 15px;
+            top: 12px;
+            color: #999;
+            font-size: 14px;
+            transition: all 0.3s;
+            pointer-events: none;
+        }
+        
+        .input-group input:focus + label,
+        .input-group input:valid + label {
+            top: -8px;
+            left: 10px;
+            font-size: 11px;
+            background-color: white;
+            padding: 0 5px;
+            color: #667eea;
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            background: linear-gradient(to right, #667eea, #764ba2);
+            color: white;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .toggle-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+            padding: 10px 0;
+        }
+        
+        .toggle-btn {
+            background: none;
+            border: none;
+            color: #667eea;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 14px;
+            outline: none;
+            position: relative;
+            padding: 5px 10px;
+        }
+        
+        .toggle-btn:after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            background: #667eea;
+            bottom: -5px;
+            left: 0;
+            transition: width 0.3s;
+        }
+        
+        .toggle-btn:hover:after {
+            width: 100%;
+        }
+        
+        .social-login {
+            margin-top: 15px;
+            text-align: center;
+        }
+        
+        .social-login p {
+            color: #999;
+            margin-bottom: 15px;
+            position: relative;
+            font-size: 13px;
+        }
+        
+        .social-login p:before,
+        .social-login p:after {
+            content: '';
+            position: absolute;
+            width: 30%;
+            height: 1px;
+            background: #e6e6e6;
+            top: 50%;
+        }
+        
+        .social-login p:before {
+            left: 0;
+        }
+        
+        .social-login p:after {
+            right: 0;
+        }
+        
+        .social-icons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .social-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .social-item:hover {
+            transform: translateY(-3px);
+        }
+        
+        .social-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        .social-text {
+            font-size: 11px;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        /* 社交图标颜色 */
+        .qq-icon {
+            background-color: #12B7F5;
+        }
+        
+        .wechat-icon {
+            background-color: #07C160;
+        }
+        
+        .weibo-icon {
+            background-color: #E6162D;
+        }
+        
+        /* 注册表单样式 */
+        #register {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            z-index: 1;
+            transform: translateY(100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+        }
+        
+        .register-mode #register {
+            transform: translateY(0);
+            opacity: 1;
+            z-index: 5;
+        }
+        
+        .register-mode #login {
+            transform: translateY(-100%);
+            opacity: 0;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .main-container {
+                width: 90%;
+                height: auto;
+                flex-direction: column;
+            }
+            
+            .pattern-bg {
+                width: 100%;
+                height: 150px;
+            }
+            
+            .form-container {
+                width: 100%;
+                padding: 25px 20px;
+            }
+            
+            .register-mode {
+                height: auto;
+            }
+            
+            .social-icon {
+                width: 36px;
+                height: 36px;
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container login-mode" id="main-container">
+        <!-- 背景图案区域 -->
+        <div class="pattern-bg"></div>
+        
+        <!-- 登录表单 -->
+        <div class="form-container" id="login">
+            <div class="form-content">
+                <h2 class="title">欢迎回来</h2>
+                <form>
+                    <div class="input-group">
+                        <input type="text" id="login-email" required>
+                        <label for="login-email">邮箱/用户名</label>
+                    </div>
+                    <div class="input-group">
+                        <input type="password" id="login-password" required>
+                        <label for="login-password">密码</label>
+                    </div>
+                    <button type="submit" class="btn">登录</button>
+                </form>
+                <div class="toggle-container">
+                    <button class="toggle-btn" onclick="toggleForms()">没有账号？立即注册</button>
+                </div>
+                <div class="social-login">
+                    <p>或使用以下方式登录</p>
+                    <div class="social-icons">
+                        <div class="social-item">
+                            <div class="social-icon qq-icon">Q</div>
+                            <div class="social-text">QQ登录</div>
+                        </div>
+                        <div class="social-item">
+                            <div class="social-icon wechat-icon">W</div>
+                            <div class="social-text">微信登录</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 注册表单 -->
+        <div id="register">
+            <div class="form-content">
+                <h2 class="title">创建账号</h2>
+                <form>
+                    <div class="input-group">
+                        <input type="text" id="register-username" required>
+                        <label for="register-username">用户名</label>
+                    </div>
+                    <div class="input-group">
+                        <input type="email" id="register-email" required>
+                        <label for="register-email">邮箱</label>
+                    </div>
+                    <div class="input-group">
+                        <input type="password" id="register-password" required>
+                        <label for="register-password">密码</label>
+                    </div>
+                    <div class="input-group">
+                        <input type="password" id="register-confirm-password" required>
+                        <label for="register-confirm-password">确认密码</label>
+                    </div>
+                    <button type="submit" class="btn">注册</button>
+                </form>
+                <div class="toggle-container">
+                    <button class="toggle-btn" onclick="toggleForms()">已有账号？立即登录</button>
+                </div>
+                <div class="social-login">
+                    <p>或使用以下方式注册</p>
+                    <div class="social-icons">
+                        <div class="social-item">
+                            <div class="social-icon qq-icon">Q</div>
+                            <div class="social-text">QQ注册</div>
+                        </div>
+                        <div class="social-item">
+                            <div class="social-icon wechat-icon">W</div>
+                            <div class="social-text">微信注册</div>
+                        </div>
+                        <div class="social-item">
+                            <div class="social-icon weibo-icon">S</div>
+                            <div class="social-text">微博注册</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 切换登录/注册表单
+        function toggleForms() {
+            const container = document.getElementById('main-container');
+            
+            // 先隐藏内容
+            const formContents = document.querySelectorAll('.form-content');
+            formContents.forEach(content => {
+                content.style.opacity = '0';
+            });
+            
+            // 切换模式
+            setTimeout(() => {
+                container.classList.toggle('login-mode');
+                container.classList.toggle('register-mode');
+                
+                // 显示内容
+                setTimeout(() => {
+                    const activeForm = container.classList.contains('login-mode') 
+                        ? document.querySelector('#login .form-content')
+                        : document.querySelector('#register .form-content');
+                    activeForm.style.opacity = '1';
+                }, 300);
+            }, 300);
+        }
+        
+        // 输入框标签动画
+        document.querySelectorAll('.input-group input').forEach(input => {
+            input.addEventListener('focus', function() {
+                this.parentNode.querySelector('label').classList.add('active');
+            });
+            
+            input.addEventListener('blur', function() {
+                if (!this.value) {
+                    this.parentNode.querySelector('label').classList.remove('active');
+                }
+            });
+            
+            // 检查初始值
+            if (input.value) {
+                input.parentNode.querySelector('label').classList.add('active');
+            }
+        });
+        
+        // 流星拖尾效果
+        document.addEventListener('mousemove', function(e) {
+            const trail = document.createElement('div');
+            trail.className = 'trail';
+            
+            // 设置位置和角度
+            const x = e.clientX;
+            const y = e.clientY;
+            trail.style.left = `${x}px`;
+            trail.style.top = `${y}px`;
+            
+            // 随机长度和颜色
+            const length = Math.random() * 80 + 50;
+            trail.style.width = `${length}px`;
+            
+            // 随机角度
+            const angle = Math.random() * 180 - 90;
+            trail.style.transform = `rotate(${angle}deg)`;
+            
+            // 随机颜色
+            const hue = Math.random() * 60 + 180; // 蓝色到青色范围
+            trail.style.background = `linear-gradient(90deg, hsla(${hue}, 100%, 70%, 0.8), hsla(${hue}, 100%, 70%, 0))`;
+            
+            document.body.appendChild(trail);
+            
+            // 动画结束后移除
+            setTimeout(() => {
+                trail.remove();
+            }, 500);
+        });
+    </script>
+</body>
+</html>
